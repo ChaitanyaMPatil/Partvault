@@ -1,0 +1,1953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>PartVault</title>
+<style>
+/* ══════════════════════════════════════════════════════════
+   RESET + VARIABLES
+══════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f1f5f9;
+  --surface:#fff;
+  --border:#e2e8f0;
+  --border-light:#f1f5f9;
+  --text1:#0f172a;
+  --text2:#475569;
+  --text3:#94a3b8;
+  --blue:#2563eb;
+  --blue-lt:#eff6ff;
+  --blue-md:#dbeafe;
+  --green:#16a34a;
+  --green-lt:#f0fdf4;
+  --green-md:#dcfce7;
+  --orange:#d97706;
+  --orange-lt:#fffbeb;
+  --orange-md:#fef3c7;
+  --red:#dc2626;
+  --red-lt:#fef2f2;
+  --grey-lt:#f8fafc;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --shadow:0 4px 12px rgba(0,0,0,.08);
+  --r4:4px;--r6:6px;--r8:8px;--r12:12px;
+  --sidebar:216px;
+  --header:52px;
+  font-family:-apple-system,'Segoe UI',system-ui,sans-serif;
+  font-size:14px;color:var(--text1);
+}
+
+/* ══════════════════════════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════════════════════════ */
+.hidden{display:none!important}
+
+/* ══════════════════════════════════════════════════════════
+   LOGIN PAGE
+══════════════════════════════════════════════════════════ */
+#login-page{
+  min-height:100vh;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+}
+.login-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--r12);
+  padding:40px 36px;width:380px;box-shadow:var(--shadow);
+}
+.login-logo{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.login-logo .pv-icon{
+  width:32px;height:32px;background:var(--blue);border-radius:var(--r6);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:800;font-size:13px;letter-spacing:-.5px;
+}
+.login-logo span{font-size:18px;font-weight:700;color:var(--text1)}
+.login-subtitle{font-size:13px;color:var(--text3);margin-bottom:28px}
+.form-label{
+  display:block;font-size:11px;font-weight:600;color:var(--text2);
+  text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;
+}
+.form-group{margin-bottom:14px}
+.form-input{
+  width:100%;padding:9px 12px;border:1px solid var(--border);
+  border-radius:var(--r8);font-size:14px;color:var(--text1);
+  outline:none;transition:border-color .15s;background:#fff;
+}
+.form-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+.btn-login{
+  width:100%;padding:10px;background:var(--blue);color:#fff;border:none;
+  border-radius:var(--r8);font-size:14px;font-weight:600;cursor:pointer;
+  transition:background .15s;margin-top:4px;
+}
+.btn-login:hover{background:#1d4ed8}
+.btn-login:disabled{background:#94a3b8;cursor:not-allowed}
+.login-error{
+  margin-top:10px;padding:8px 12px;background:var(--red-lt);
+  border:1px solid #fecaca;border-radius:var(--r6);
+  font-size:13px;color:var(--red);
+}
+.demo-hint{
+  margin-top:16px;padding:10px 12px;background:var(--blue-lt);
+  border:1px solid var(--blue-md);border-radius:var(--r6);
+  font-size:12px;color:#1e40af;text-align:center;
+}
+
+/* ══════════════════════════════════════════════════════════
+   APP SHELL
+══════════════════════════════════════════════════════════ */
+#app-shell{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+/* HEADER */
+.app-header{
+  height:var(--header);min-height:var(--header);
+  background:#fff;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 16px;
+  gap:12px;z-index:100;
+}
+.hdr-logo{display:flex;align-items:center;gap:7px;text-decoration:none;flex-shrink:0}
+.hdr-logo .pv-icon{
+  width:28px;height:28px;background:var(--blue);border-radius:5px;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:800;font-size:11px;
+}
+.hdr-logo-text{font-size:15px;font-weight:700;color:var(--text1)}
+.hdr-search{
+  flex:1;max-width:360px;
+  display:flex;align-items:center;gap:6px;
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--r6);padding:6px 10px;
+}
+.hdr-search input{
+  border:none;background:transparent;outline:none;
+  font-size:13px;color:var(--text1);width:100%;
+}
+.hdr-search input::placeholder{color:var(--text3)}
+.hdr-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.hdr-btn{
+  display:flex;align-items:center;gap:4px;padding:5px 10px;
+  background:#fff;border:1px solid var(--border);border-radius:var(--r6);
+  font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;
+  transition:background .12s;
+}
+.hdr-btn:hover{background:var(--bg)}
+.hdr-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.hdr-btn.primary:hover{background:#1d4ed8}
+.hdr-divider{width:1px;height:22px;background:var(--border)}
+.hdr-user{display:flex;align-items:center;gap:8px}
+.hdr-avatar{
+  width:28px;height:28px;background:var(--blue);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:11px;font-weight:700;flex-shrink:0;
+}
+.hdr-user-name{font-size:13px;font-weight:500}
+.hdr-role-badge{
+  font-size:10px;font-weight:700;color:#1e40af;background:var(--blue-md);
+  padding:1px 6px;border-radius:var(--r4);text-transform:uppercase;letter-spacing:.04em;
+}
+.hdr-logout-btn{
+  padding:4px 8px;background:transparent;border:1px solid var(--border);
+  border-radius:var(--r6);font-size:11px;color:var(--text3);cursor:pointer;
+}
+.hdr-logout-btn:hover{background:var(--bg);color:var(--text2)}
+
+/* BODY */
+.app-body{display:flex;flex:1;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{
+  width:var(--sidebar);min-width:var(--sidebar);
+  background:#fff;border-right:1px solid var(--border);
+  overflow-y:auto;padding:16px 0;
+}
+.sidebar-section-label{
+  font-size:10px;font-weight:700;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.08em;
+  padding:0 16px;margin-bottom:4px;margin-top:12px;
+}
+.sidebar-section-label:first-child{margin-top:0}
+.sidebar-item{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 16px;cursor:pointer;
+  font-size:13px;color:var(--text2);
+  transition:background .1s,color .1s;
+}
+.sidebar-item:hover{background:var(--bg);color:var(--text1)}
+.sidebar-item.active{background:var(--blue-lt);color:var(--blue);font-weight:600}
+.sidebar-item .si-icon{font-size:14px;flex-shrink:0}
+.sidebar-item .si-label{flex:1}
+.sidebar-badge{
+  background:var(--blue);color:#fff;font-size:10px;font-weight:700;
+  padding:1px 6px;border-radius:10px;min-width:18px;text-align:center;
+}
+
+/* MAIN */
+.main-content{flex:1;overflow-y:auto;background:var(--bg)}
+
+/* ══════════════════════════════════════════════════════════
+   STATUS BADGES
+══════════════════════════════════════════════════════════ */
+.status-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600;
+  white-space:nowrap;
+}
+.badge-Done      {background:var(--green-md);color:#14532d}
+.badge-InProgress{background:var(--blue-md);color:#1e3a8a}
+.badge-Outlier   {background:var(--orange-md);color:#78350f}
+.badge-Pending   {background:#f1f5f9;color:#475569;border:1px solid var(--border)}
+
+/* ══════════════════════════════════════════════════════════
+   DASHBOARD — STAT CARDS
+══════════════════════════════════════════════════════════ */
+.dashboard-wrap{padding:24px}
+.dash-header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:20px;
+}
+.dash-title{font-size:18px;font-weight:700;color:var(--text1)}
+.dash-subtitle{font-size:12px;color:var(--text3);margin-top:2px}
+.dash-actions{display:flex;gap:8px;flex-shrink:0}
+.btn-sync{
+  display:flex;align-items:center;gap:5px;padding:6px 12px;
+  background:#fff;border:1px solid var(--border);border-radius:var(--r6);
+  font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;
+  transition:background .12s;
+}
+.btn-sync:hover{background:var(--bg)}
+.btn-extract{
+  display:flex;align-items:center;gap:5px;padding:6px 12px;
+  background:var(--blue);color:#fff;border:1px solid var(--blue);
+  border-radius:var(--r6);font-size:12px;font-weight:500;cursor:pointer;
+  transition:background .12s;
+}
+.btn-extract:hover{background:#1d4ed8}
+
+.stats-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:14px;margin-bottom:24px;
+}
+.stat-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--r8);
+  padding:16px;display:flex;align-items:flex-start;gap:14px;
+  box-shadow:var(--shadow-sm);
+}
+.stat-icon{
+  width:40px;height:40px;border-radius:var(--r8);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.stat-icon.blue  {background:var(--blue-lt)}
+.stat-icon.green {background:var(--green-lt)}
+.stat-icon.orange{background:var(--orange-lt)}
+.stat-icon.grey  {background:var(--grey-lt)}
+.stat-number{font-size:26px;font-weight:800;line-height:1;color:var(--text1)}
+.stat-label{
+  font-size:10px;font-weight:700;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.05em;margin-top:2px;
+}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.stat-done-pct{font-size:11px;color:var(--green);font-weight:600}
+
+/* ══════════════════════════════════════════════════════════
+   DASHBOARD — SEARCH + TABS
+══════════════════════════════════════════════════════════ */
+.dash-search-row{
+  display:flex;align-items:center;gap:12px;margin-bottom:16px;
+  background:#fff;border:1px solid var(--border);border-radius:var(--r8);
+  padding:10px 16px;
+}
+.dash-search-row label{
+  font-size:10px;font-weight:700;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;
+}
+.dash-search-input{
+  flex:1;border:none;outline:none;font-size:13px;
+  color:var(--text1);background:transparent;
+}
+.dash-search-input::placeholder{color:var(--text3)}
+.btn-goto{
+  padding:5px 14px;background:var(--blue);color:#fff;
+  border:none;border-radius:var(--r6);font-size:12px;
+  font-weight:600;cursor:pointer;flex-shrink:0;
+  transition:background .12s;
+}
+.btn-goto:hover{background:#1d4ed8}
+.btn-clear{
+  padding:5px 10px;background:transparent;
+  border:1px solid var(--border);border-radius:var(--r6);
+  font-size:12px;color:var(--text3);cursor:pointer;
+}
+.btn-clear:hover{color:var(--text2);background:var(--bg)}
+
+.filter-row{
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);margin-bottom:16px;
+  flex-wrap:wrap;gap:8px;
+}
+.filter-tabs{display:flex;gap:0}
+.filter-tab{
+  padding:8px 14px;font-size:13px;font-weight:500;color:var(--text2);
+  cursor:pointer;background:none;border:none;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:color .12s,border-color .12s;
+}
+.filter-tab:hover{color:var(--text1)}
+.filter-tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+.tab-count{
+  display:inline-block;background:var(--bg);color:var(--text3);
+  font-size:11px;padding:1px 5px;border-radius:9px;margin-left:4px;
+}
+.filter-tab.active .tab-count{background:var(--blue-md);color:#1e40af}
+.filter-controls{
+  display:flex;align-items:center;gap:10px;padding-bottom:8px;flex-wrap:wrap;
+}
+.sort-select{
+  border:1px solid var(--border);border-radius:var(--r6);
+  padding:4px 8px;font-size:12px;color:var(--text2);
+  background:#fff;cursor:pointer;outline:none;
+}
+.dash-inline-search{
+  padding:5px 10px;border:1px solid var(--border);border-radius:var(--r6);
+  font-size:12px;color:var(--text1);background:#fff;outline:none;width:210px;
+}
+.dash-inline-search:focus{border-color:var(--blue)}
+
+/* ══════════════════════════════════════════════════════════
+   PART CARDS
+══════════════════════════════════════════════════════════ */
+.parts-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  gap:12px;
+}
+.part-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--r8);
+  padding:14px 16px 12px;cursor:pointer;
+  border-left:3px solid transparent;
+  transition:box-shadow .15s,border-color .15s;
+  display:flex;flex-direction:column;gap:8px;
+}
+.part-card:hover{box-shadow:var(--shadow);border-color:#cbd5e1}
+.part-card.s-Done      {border-left-color:var(--green)}
+.part-card.s-InProgress{border-left-color:var(--blue)}
+.part-card.s-Outlier   {border-left-color:var(--orange)}
+.part-card.s-Pending   {border-left-color:var(--border)}
+.card-top{
+  display:flex;align-items:flex-start;
+  justify-content:space-between;gap:8px;
+}
+.card-pn{font-size:13px;font-weight:700;color:var(--blue);font-family:monospace}
+.card-name{
+  font-size:12px;color:var(--text2);line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:2;
+  -webkit-box-orient:vertical;overflow:hidden;
+  line-clamp:2;
+}
+.card-meta{
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;color:var(--text3);flex-wrap:wrap;
+}
+.card-meta-sep{color:var(--border)}
+.card-vmrs{
+  display:inline-flex;align-items:center;
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--r4);padding:1px 6px;
+  font-size:10px;font-weight:600;color:var(--text2);
+}
+.card-footer{display:flex;align-items:center;gap:8px}
+.card-progress{flex:1;display:flex;align-items:center;gap:6px}
+.progress-bar{
+  flex:1;height:4px;background:var(--bg);
+  border-radius:9999px;overflow:hidden;
+}
+.progress-fill{height:100%;border-radius:9999px;transition:width .3s}
+.pf-Done      {background:var(--green)}
+.pf-InProgress{background:var(--blue)}
+.pf-Outlier   {background:var(--orange)}
+.pf-Pending   {background:#cbd5e1}
+.progress-pct{font-size:11px;color:var(--text3);flex-shrink:0;min-width:28px}
+.card-action{
+  padding:4px 10px;background:var(--blue-lt);color:var(--blue);
+  border:1px solid var(--blue-md);border-radius:var(--r6);
+  font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;
+  white-space:nowrap;transition:background .12s;
+}
+.card-action:hover{background:var(--blue-md)}
+.no-parts-msg{
+  grid-column:1/-1;text-align:center;padding:48px 0;
+  color:var(--text3);font-size:14px;line-height:2;
+}
+
+/* ══════════════════════════════════════════════════════════
+   PAGINATION
+══════════════════════════════════════════════════════════ */
+.pagination-row{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;margin-top:20px;padding:12px 0;
+  border-top:1px solid var(--border);
+}
+.pg-info{font-size:12px;color:var(--text3)}
+.pg-info strong{color:var(--text1)}
+.pg-controls{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.pg-btn{
+  min-width:32px;height:30px;padding:0 8px;
+  background:#fff;border:1px solid var(--border);
+  border-radius:var(--r6);font-size:12px;font-weight:500;
+  color:var(--text2);cursor:pointer;
+  transition:background .12s,border-color .12s;
+}
+.pg-btn:hover:not(:disabled){background:var(--bg);border-color:#94a3b8}
+.pg-btn:disabled{color:var(--text3);cursor:not-allowed;opacity:.5}
+.pg-btn.pg-active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.pg-goto{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3)}
+.pg-input{
+  border:1px solid var(--border);border-radius:var(--r6);
+  padding:3px 6px;font-size:12px;color:var(--text1);
+  text-align:center;outline:none;width:52px;
+}
+.pg-input:focus{border-color:var(--blue)}
+
+/* ══════════════════════════════════════════════════════════
+   SKELETON LOADER
+══════════════════════════════════════════════════════════ */
+.skeleton-card{
+  background:#fff;border:1px solid var(--border);
+  border-radius:var(--r8);padding:14px 16px;min-height:130px;overflow:hidden;
+}
+.sk{
+  background:linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%);
+  background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:4px;
+}
+@keyframes shimmer{
+  0%{background-position:200% 0}100%{background-position:-200% 0}
+}
+.sk-line{height:12px;margin-bottom:8px}
+.sk-line.tall{height:18px}
+.sk-line.short{width:60%}
+.sk-line.xshort{width:40%}
+.sk-line.bar{height:5px;margin-top:14px}
+
+/* Search active badge */
+.search-active-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--blue-md);color:#1e3a8a;
+  padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600;
+}
+.search-clear-x{cursor:pointer;font-size:13px;color:#1e40af;margin-left:2px}
+.search-clear-x:hover{color:var(--red)}
+
+/* ══════════════════════════════════════════════════════════
+   PART DETAIL PAGE
+══════════════════════════════════════════════════════════ */
+.pd-wrap{padding:24px;min-height:100%}
+.pd-breadcrumb{
+  display:flex;align-items:center;gap:6px;
+  font-size:12px;color:var(--text3);margin-bottom:16px;
+}
+.pd-breadcrumb a{
+  color:var(--text3);cursor:pointer;text-decoration:none;
+}
+.pd-breadcrumb a:hover{color:var(--blue);text-decoration:underline}
+.pd-breadcrumb-sep{color:var(--border)}
+
+.pd-header-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--r12);
+  padding:20px 24px;margin-bottom:20px;box-shadow:var(--shadow-sm);
+}
+.pd-header-top{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:10px;
+}
+.pd-pn-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pd-part-number{
+  font-size:22px;font-weight:800;color:var(--blue);font-family:monospace;
+}
+.pd-meta-row{
+  display:flex;align-items:center;gap:16px;
+  font-size:12px;color:var(--text2);margin-bottom:16px;flex-wrap:wrap;
+}
+.pd-meta-item{display:flex;align-items:center;gap:5px}
+.pd-desc-row{
+  display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;
+}
+.pd-desc-label{
+  font-size:10px;font-weight:700;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;min-width:80px;
+}
+.pd-desc-input{
+  flex:1;border:1px solid var(--border);border-radius:var(--r6);
+  padding:7px 10px;font-size:13px;color:var(--text1);outline:none;
+  transition:border-color .15s;min-width:200px;
+}
+.pd-desc-input:focus{
+  border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.08);
+}
+.btn-update-desc{
+  padding:6px 12px;background:#fff;border:1px solid var(--border);
+  border-radius:var(--r6);font-size:12px;color:var(--text2);cursor:pointer;
+  white-space:nowrap;display:flex;align-items:center;gap:4px;flex-shrink:0;
+}
+.btn-update-desc:hover{background:var(--bg)}
+.pd-progress-row{
+  display:flex;align-items:center;gap:10px;
+  font-size:12px;color:var(--text2);flex-wrap:wrap;
+}
+.pd-progress-label{flex-shrink:0}
+.pd-mand-bar{
+  flex:1;height:7px;background:var(--bg);
+  border-radius:9999px;overflow:hidden;min-width:100px;
+}
+.pd-mand-fill{
+  height:100%;background:var(--blue);
+  border-radius:9999px;transition:width .3s;
+}
+.pd-mand-pct{flex-shrink:0;font-weight:700;font-size:13px;color:var(--blue);min-width:34px}
+.pd-mand-msg{font-size:11px;color:var(--text3);flex-shrink:0}
+.btn-back{
+  display:flex;align-items:center;gap:4px;padding:6px 12px;
+  background:#fff;border:1px solid var(--border);border-radius:var(--r6);
+  font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;
+  flex-shrink:0;white-space:nowrap;transition:background .12s;
+}
+.btn-back:hover{background:var(--bg)}
+
+/* DETAIL BODY GRID */
+.pd-body{display:grid;grid-template-columns:1fr 280px;gap:16px;align-items:start}
+@media(max-width:900px){.pd-body{grid-template-columns:1fr}}
+
+/* ATTRIBUTE SECTIONS */
+.attr-section{
+  background:#fff;border:1px solid var(--border);
+  border-radius:var(--r8);margin-bottom:16px;
+  overflow:hidden;box-shadow:var(--shadow-sm);
+}
+.attr-section-hdr{
+  display:flex;align-items:center;gap:12px;padding:10px 16px;
+  background:var(--grey-lt);border-bottom:1px solid var(--border);flex-wrap:wrap;
+}
+.sec-badge{
+  display:inline-flex;align-items:center;padding:3px 8px;
+  border-radius:4px;font-size:10px;font-weight:800;
+  letter-spacing:.06em;text-transform:uppercase;
+}
+.sec-badge-mandatory   {background:#1e40af;color:#fff}
+.sec-badge-value-adding{background:#0369a1;color:#fff}
+.sec-desc{font-size:12px;color:var(--text3);flex:1}
+.sec-progress{
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:600;color:var(--text2);flex-shrink:0;
+}
+.sec-progress-line{
+  width:60px;height:3px;background:var(--border);
+  border-radius:9999px;overflow:hidden;
+}
+.sec-progress-fill-m {height:100%;background:var(--blue);border-radius:9999px;transition:width .2s}
+.sec-progress-fill-va{height:100%;background:#0369a1;border-radius:9999px;transition:width .2s}
+
+.attr-table-wrap{overflow-x:auto}
+.attr-table{width:100%;border-collapse:collapse;font-size:12px}
+.attr-table th{
+  padding:7px 10px;text-align:left;
+  font-size:10px;font-weight:700;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.05em;
+  background:var(--grey-lt);border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+.attr-table td{
+  padding:5px 10px;border-bottom:1px solid var(--border-light);
+  vertical-align:middle;
+}
+.attr-table tbody tr:last-child td{border-bottom:none}
+.attr-table tbody tr:hover td{background:#fafbfc}
+.attr-table tbody tr.row-outlier td{background:#fffbeb!important}
+.attr-table tbody tr.row-outlier:hover td{background:#fef9c3!important}
+
+.td-code{font-family:monospace;font-size:11px;color:var(--text3);white-space:nowrap}
+.td-name{font-weight:600;font-size:12px;white-space:nowrap}
+.td-required{color:var(--red);margin-left:1px}
+
+.val-wrap{display:flex;align-items:center;gap:5px;min-width:120px}
+.val-dot{font-size:10px;flex-shrink:0;line-height:1}
+.val-dot.filled{color:var(--green)}
+.val-dot.empty {color:#cbd5e1}
+.val-input{
+  border:none;background:transparent;outline:none;
+  font-size:12px;color:var(--text1);width:100%;min-width:90px;cursor:text;
+}
+.val-input::placeholder{color:#cbd5e1;font-style:italic}
+.val-input:focus{
+  background:var(--blue-lt);border-radius:var(--r4);
+  padding:2px 5px;margin-left:-5px;
+}
+.uom-select,.type-select{
+  border:none;background:transparent;font-size:11px;
+  color:var(--text2);cursor:pointer;padding:2px;outline:none;max-width:130px;
+}
+.uom-select:focus,.type-select:focus{background:var(--bg);border-radius:var(--r4)}
+.cls-badge{
+  display:inline-block;padding:2px 7px;border-radius:99px;
+  font-size:10px;font-weight:700;
+}
+.cls-Mandatory    {background:var(--blue-md);color:#1e3a8a}
+.cls-Value-Adding {background:#e0f2fe;color:#0c4a6e}
+.outlier-icon{font-size:14px;cursor:pointer}
+.normal-icon{font-size:14px;color:var(--text3);opacity:.4}
+
+/* ADD ROW */
+.add-row td{background:var(--grey-lt)!important;padding:8px 10px}
+.add-row-inner{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.add-tag{
+  font-size:11px;font-weight:700;color:var(--blue);
+  cursor:pointer;white-space:nowrap;padding:0 4px;
+}
+.add-input{
+  border:1px solid var(--border);border-radius:var(--r4);
+  padding:4px 7px;font-size:12px;color:var(--text1);
+  outline:none;background:#fff;
+}
+.add-input:focus{border-color:var(--blue)}
+.add-input.sm{width:90px}
+.add-input.xs{width:60px}
+.add-select{
+  border:1px solid var(--border);border-radius:var(--r4);
+  padding:4px 6px;font-size:11px;color:var(--text2);
+  background:#fff;cursor:pointer;outline:none;
+}
+.btn-add{
+  padding:4px 12px;background:var(--blue);color:#fff;
+  border:none;border-radius:var(--r4);font-size:12px;
+  font-weight:600;cursor:pointer;white-space:nowrap;
+}
+.btn-add:hover{background:#1d4ed8}
+
+/* IMAGE PANEL */
+.img-panel{
+  background:#fff;border:1px solid var(--border);
+  border-radius:var(--r8);overflow:hidden;
+  position:sticky;top:24px;box-shadow:var(--shadow-sm);
+}
+.img-panel-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  background:var(--grey-lt);
+}
+.img-panel-title{
+  font-size:10px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.08em;color:#1e40af;
+}
+.img-visual-check{
+  font-size:11px;color:var(--blue);cursor:pointer;text-decoration:underline;
+}
+.img-placeholder{
+  height:180px;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:8px;border-bottom:1px solid var(--border);
+}
+.img-placeholder-icon{font-size:52px;opacity:.25}
+.img-placeholder-label{font-size:11px;color:var(--text3)}
+.img-info{padding:12px 14px;font-size:11px;color:var(--text2);line-height:1.8}
+.img-info-row{display:flex;gap:6px}
+.img-info-key{color:var(--text3);flex-shrink:0}
+.img-info-val{color:var(--text1);font-weight:500}
+.img-status-note{font-size:10px;color:var(--text3);margin-top:6px;font-style:italic}
+.btn-replace{
+  margin:12px 14px;width:calc(100% - 28px);padding:6px;
+  background:#fff;border:1px solid var(--border);border-radius:var(--r6);
+  font-size:12px;color:var(--text2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.btn-replace:hover{background:var(--bg)}
+
+/* ══════════════════════════════════════════════════════════
+   ACTION BAR
+══════════════════════════════════════════════════════════ */
+.action-bar{
+  position:sticky;bottom:0;background:#fff;
+  border-top:1px solid var(--border);padding:12px 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 -2px 10px rgba(0,0,0,.06);z-index:50;flex-wrap:wrap;gap:10px;
+}
+.action-bar-left{display:flex;align-items:center;gap:14px;font-size:12px;flex-wrap:wrap}
+.action-count{color:var(--text2)}
+.action-count strong{color:var(--blue)}
+.action-outlier-warn{
+  display:flex;align-items:center;gap:4px;
+  color:var(--orange);font-weight:600;font-size:12px;
+}
+.action-bar-right{display:flex;align-items:center;gap:8px}
+.btn-cancel{
+  padding:7px 16px;background:#fff;border:1px solid var(--border);
+  border-radius:var(--r6);font-size:13px;font-weight:500;
+  color:var(--text2);cursor:pointer;
+}
+.btn-cancel:hover{background:var(--bg)}
+.btn-partial{
+  padding:7px 16px;background:#fff;border:1px solid var(--orange);
+  border-radius:var(--r6);font-size:13px;font-weight:600;
+  color:var(--orange);cursor:pointer;
+  display:flex;align-items:center;gap:5px;
+}
+.btn-partial:hover{background:var(--orange-lt)}
+.btn-complete{
+  padding:7px 18px;background:var(--blue);border:none;
+  border-radius:var(--r6);font-size:13px;font-weight:600;
+  color:#fff;cursor:pointer;
+  display:flex;align-items:center;gap:5px;transition:background .12s;
+}
+.btn-complete:hover:not(:disabled){background:#1d4ed8}
+.btn-complete:disabled{background:#94a3b8;cursor:not-allowed}
+
+/* ══════════════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════════════ */
+#toast{
+  position:fixed;bottom:80px;left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:#1e293b;color:#fff;padding:10px 20px;
+  border-radius:var(--r8);font-size:13px;font-weight:500;
+  opacity:0;transition:all .25s;z-index:9999;
+  pointer-events:none;white-space:nowrap;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ══════════════════════════════════════════════════════════
+   LOADER
+══════════════════════════════════════════════════════════ */
+.loader{
+  display:flex;align-items:center;justify-content:center;
+  height:200px;color:var(--text3);font-size:14px;gap:8px;
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════ LOGIN PAGE ══════════════════════════ -->
+<div id="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="pv-icon">PV</div>
+      <span>PartVault</span>
+    </div>
+    <p class="login-subtitle">Sign in to your workspace</p>
+
+    <div class="form-group">
+      <label class="form-label" for="li-user">Username</label>
+      <input id="li-user" class="form-input" type="text"
+             placeholder="demo" autocomplete="username"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="li-pass">Password</label>
+      <input id="li-pass" class="form-input" type="password"
+             placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <button id="li-btn" class="btn-login">Sign In</button>
+    <div id="li-error" class="login-error hidden"></div>
+    <div class="demo-hint">
+      Demo credentials &nbsp;<strong>demo</strong> / <strong>demo123</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ APP SHELL ══════════════════════════ -->
+<div id="app-shell" class="hidden">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="hdr-logo">
+      <div class="pv-icon">PV</div>
+      <span class="hdr-logo-text">PartVault</span>
+    </div>
+
+    <div class="hdr-search">
+      <span style="color:var(--text3);font-size:14px">🔍</span>
+      <input id="hdr-search-input" placeholder="Jump to part number…" autocomplete="off"/>
+    </div>
+
+    <div class="hdr-right">
+      <button class="hdr-btn" onclick="refreshDashboard()">🔄 Sync</button>
+      <button class="hdr-btn primary"
+              onclick="showToast('Export coming in production')">
+        ⬇ Extract List ▾
+      </button>
+      <div class="hdr-divider"></div>
+      <div class="hdr-user">
+        <div class="hdr-avatar" id="hdr-avatar">AR</div>
+        <span class="hdr-user-name" id="hdr-name">A. Rajan</span>
+        <span class="hdr-role-badge" id="hdr-role">REVIEWER</span>
+        <button class="hdr-logout-btn" onclick="doLogout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- BODY -->
+  <div class="app-body">
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <div class="sidebar-section-label">My Work</div>
+      <div class="sidebar-item active" id="si-assigned"
+           onclick="navigate('dashboard')">
+        <span class="si-icon">📋</span>
+        <span class="si-label">Assigned Parts</span>
+        <span class="sidebar-badge" id="si-assigned-count">0</span>
+      </div>
+      <div class="sidebar-item"
+           onclick="showToast('Outlier Flags — coming soon')">
+        <span class="si-icon">⚠️</span>
+        <span class="si-label">Outlier Flags</span>
+      </div>
+      <div class="sidebar-item"
+           onclick="showToast('My Activity — coming soon')">
+        <span class="si-icon">📊</span>
+        <span class="si-label">My Activity</span>
+      </div>
+
+      <div class="sidebar-section-label">Reference</div>
+      <div class="sidebar-item"
+           onclick="showToast('Image Repository — connect storage in production')">
+        <span class="si-icon">🖼️</span>
+        <span class="si-label">Image Repository</span>
+      </div>
+      <div class="sidebar-item"
+           onclick="showToast('All Parts — available in production')">
+        <span class="si-icon">📦</span>
+        <span class="si-label">All Parts</span>
+      </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content" id="main-content"></main>
+
+  </div><!-- .app-body -->
+</div><!-- #app-shell -->
+
+<div id="toast"></div>
+
+<!-- ════════════════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════════════ -->
+<script>
+const API = 'http://localhost:5000/api';
+
+/* ────────────────────────────────────────────────────────────
+   STATE
+──────────────────────────────────────────────────────────── */
+const S = {
+  token:      localStorage.getItem('pv_token') || null,
+  user:       null,
+  view:       'dashboard',
+
+  // dashboard
+  parts:      [],
+  stats:      {},
+  pagination: { page:1, limit:48, total:0, pages:1, has_next:false, has_prev:false },
+  filter:     'all',
+  searchTerm: '',
+  page:       1,
+  limit:      48,
+  loading:    false,
+
+  // part detail
+  part:       null,
+  attrDefs:   { mandatory:[], value_adding:[] },
+  attrVals:   {},
+};
+
+let _searchDebounce = null;
+
+/* ────────────────────────────────────────────────────────────
+   API HELPER
+──────────────────────────────────────────────────────────── */
+async function apiFetch(path, opts={}) {
+  const headers = {
+    'Content-Type':  'application/json',
+    'Authorization': S.token ? 'Bearer ' + S.token : '',
+  };
+
+  const controller = new AbortController();
+  const timeout    = setTimeout(() => controller.abort(), 15000);
+
+  let res;
+  try {
+    res = await fetch(API + path, {
+      ...opts,
+      headers,
+      signal: controller.signal,
+    });
+  } catch (e) {
+    if (e.name === 'AbortError') {
+      throw { status: 408, msg: 'Request timed out (15s). Backend may be overloaded or DB locked.' };
+    }
+    throw { status: 0, msg: 'Cannot reach server on port 5000. Is the backend running?' };
+  } finally {
+    clearTimeout(timeout);
+  }
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw { status: res.status, msg: data.error || 'HTTP ' + res.status };
+  return data;
+}
+
+/* ────────────────────────────────────────────────────────────
+   AUTH
+──────────────────────────────────────────────────────────── */
+async function doLogin() {
+  const username = document.getElementById('li-user').value.trim();
+  const password = document.getElementById('li-pass').value;
+  const errEl    = document.getElementById('li-error');
+  const btn      = document.getElementById('li-btn');
+
+  if (!username || !password) {
+    showLoginError('Enter username and password.');
+    return;
+  }
+
+  errEl.classList.add('hidden');
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+
+  try {
+    // Temporarily clear token so we don't send "Bearer old-token" on login
+    const savedToken = S.token;
+    S.token = null;
+
+    const { token, user } = await apiFetch('/auth/login', {
+      method: 'POST',
+      body:   JSON.stringify({ username, password }),
+    });
+
+    if (!token) {
+      console.error('[Login] Backend response missing token field!');
+      showLoginError('Server error: no token returned. Check Flask terminal.');
+      S.token = savedToken;
+      return;
+    }
+
+    console.log('[Login] ✅ Token received, length:', token.length,
+                ' prefix:', token.substring(0, 30) + '…');
+
+    S.token = token;
+    S.user  = user;
+    localStorage.setItem('pv_token', token);
+    bootApp();
+
+  } catch (e) {
+    console.error('[Login] Error:', e);
+    showLoginError(e.msg || 'Cannot connect — is the backend running on port 5000?');
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = 'Sign In';
+  }
+}
+
+function doLogout() {
+  S.token = null; S.user = null; S.parts = [];
+  localStorage.removeItem('pv_token');
+  document.getElementById('app-shell').classList.add('hidden');
+  document.getElementById('login-page').style.display = '';
+  document.getElementById('li-pass').value = '';
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('li-error');
+  el.textContent = msg; el.classList.remove('hidden');
+}
+
+/* ────────────────────────────────────────────────────────────
+   BOOT
+──────────────────────────────────────────────────────────── */
+async function bootApp() {
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('app-shell').classList.remove('hidden');
+  if (S.user) {
+    document.getElementById('hdr-avatar').textContent = S.user.initials || '?';
+    document.getElementById('hdr-name').textContent   = S.user.full_name || S.user.username;
+    document.getElementById('hdr-role').textContent   = S.user.role || 'USER';
+  }
+  navigate('dashboard');
+}
+
+async function init() {
+  if (!S.token) return;
+  try { S.user = await apiFetch('/auth/me'); bootApp(); }
+  catch { doLogout(); }
+}
+
+/* ────────────────────────────────────────────────────────────
+   NAVIGATION
+──────────────────────────────────────────────────────────── */
+function navigate(view, params={}) {
+  S.view = view;
+  document.getElementById('si-assigned')
+    .classList.toggle('active', view === 'dashboard');
+  if (view === 'dashboard')        loadDashboard();
+  else if (view === 'part-detail') loadPartDetail(params.partNumber);
+}
+
+/* ────────────────────────────────────────────────────────────
+   DASHBOARD — LOAD
+──────────────────────────────────────────────────────────── */
+async function loadDashboard(resetPage=false) {
+  if (resetPage) S.page = 1;
+  if (S.loading) return;
+  S.loading = true;
+
+  // Show skeleton on fresh load
+  if (!S.parts.length) {
+    mc().innerHTML = buildDashboardShell() + buildSkeletonGrid();
+    wireDashboardEvents();
+  }
+
+  const qs = new URLSearchParams({
+    page:   S.page,
+    limit:  S.limit,
+    status: S.filter,
+    search: S.searchTerm,
+  });
+
+  try {
+    const data   = await apiFetch(`/parts/assigned?${qs}`);
+    S.parts      = data.parts;
+    S.stats      = data.stats;
+    S.pagination = data.pagination;
+    document.getElementById('si-assigned-count').textContent = S.stats.total || 0;
+    renderDashboard();
+
+  } catch (e) {
+    mc().innerHTML = `
+      <div style="
+        display:flex;flex-direction:column;align-items:center;
+        justify-content:center;padding:60px 24px;text-align:center;gap:16px;
+      ">
+        <div style="font-size:40px">⚠️</div>
+        <div style="font-size:16px;font-weight:700;color:#0f172a">
+          Failed to load parts
+        </div>
+        <div style="
+          font-size:13px;color:#64748b;max-width:440px;line-height:1.6;
+          background:#fef2f2;border:1px solid #fecaca;border-radius:8px;
+          padding:12px 16px;
+        ">
+          ${esc(e.msg || 'Unknown error')}
+        </div>
+        <div style="font-size:12px;color:#94a3b8">
+          This usually means the SQLite database is locked or the backend restarted.
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px">
+          <button onclick="retryDashboard()"
+            style="
+              padding:8px 20px;background:#2563eb;color:#fff;border:none;
+              border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;
+            ">
+            🔄 Retry
+          </button>
+          <button onclick="doLogout()"
+            style="
+              padding:8px 20px;background:#fff;color:#475569;
+              border:1px solid #e2e8f0;border-radius:6px;
+              font-size:13px;cursor:pointer;
+            ">
+            ↩ Logout
+          </button>
+        </div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:4px">
+          If retrying fails — restart the backend: <code>python app.py</code>
+        </div>
+      </div>`;
+  } finally {
+    // ✅ ALWAYS release the loading flag — prevents permanent skeleton
+    S.loading = false;
+  }
+}
+
+// ── RETRY with progressive delay ──────────────────────────────────────────────
+let _retryCount = 0;
+async function retryDashboard() {
+  _retryCount++;
+  const delay = Math.min(_retryCount * 2, 10); // 2s, 4s, 6s… max 10s
+  showToast('Retrying in ' + delay + 's… (attempt ' + _retryCount + ')');
+  await new Promise(r => setTimeout(r, delay * 1000));
+  S.parts = [];
+  S.loading = false;
+  loadDashboard(true);
+}
+
+async function refreshDashboard() {
+  S.parts = []; S.page = 1;
+  showToast('🔄 Syncing…');
+  await loadDashboard(true);
+  showToast('✅ Synced');
+}
+
+/* ────────────────────────────────────────────────────────────
+   SEARCH (debounced 400 ms)
+──────────────────────────────────────────────────────────── */
+function onSearchInput(val) {
+  clearTimeout(_searchDebounce);
+  _searchDebounce = setTimeout(() => {
+    S.searchTerm = val.trim();
+    S.page  = 1;
+    S.parts = [];
+    loadDashboard(true);
+  }, 400);
+}
+
+function clearSearch() {
+  S.searchTerm = '';
+  S.page  = 1;
+  S.parts = [];
+  ['hdr-search-input','dash-inline-search'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  loadDashboard(true);
+}
+
+/* ────────────────────────────────────────────────────────────
+   PAGINATION
+──────────────────────────────────────────────────────────── */
+function setPage(n) {
+  const maxP = S.pagination.pages || 1;
+  n = Math.max(1, Math.min(n, maxP));
+  if (n === S.page && S.parts.length) return;
+  S.page  = n;
+  S.parts = [];
+  loadDashboard();
+  document.querySelector('.main-content')?.scrollTo(0, 0);
+}
+
+/* ────────────────────────────────────────────────────────────
+   FILTER TABS
+──────────────────────────────────────────────────────────── */
+function setFilter(f) {
+  S.filter = f;
+  S.page   = 1;
+  S.parts  = [];
+  loadDashboard(true);
+}
+
+/* ────────────────────────────────────────────────────────────
+   DASHBOARD — RENDER SHELL (stats + controls)
+──────────────────────────────────────────────────────────── */
+function buildDashboardShell() {
+  const { total=0, done=0, in_progress=0, outlier=0 } = S.stats;
+  const pending = Math.max(0, total - done - in_progress - outlier);
+  const doneP   = total > 0 ? Math.round(done / total * 100) : 0;
+
+  return `
+<div class="dashboard-wrap">
+
+  <!-- Header -->
+  <div class="dash-header">
+    <div>
+      <div class="dash-title">My Assigned Parts</div>
+      <div class="dash-subtitle" id="dash-subtitle">
+        ${total} parts in this batch · last synced just now
+      </div>
+    </div>
+    <div class="dash-actions">
+      <button class="btn-sync" onclick="refreshDashboard()">🔄 Sync</button>
+      <button class="btn-extract"
+              onclick="showToast('Export available in production')">
+        ⬇ Extract List ▾
+      </button>
+    </div>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon blue">📋</div>
+      <div>
+        <div class="stat-number">${total}</div>
+        <div class="stat-label">Total Assigned</div>
+        <div class="stat-sub">in this batch</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">✅</div>
+      <div>
+        <div class="stat-number" style="color:var(--green)">${done}</div>
+        <div class="stat-label">Completed</div>
+        <div class="stat-sub stat-done-pct">${doneP}% of batch</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue">⏳</div>
+      <div>
+        <div class="stat-number" style="color:var(--blue)">${in_progress}</div>
+        <div class="stat-label">In Progress</div>
+        <div class="stat-sub">started, not submitted</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon orange">⚠️</div>
+      <div>
+        <div class="stat-number" style="color:var(--orange)">${outlier}</div>
+        <div class="stat-label">Outlier Flags</div>
+        <div class="stat-sub">needs your review</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Part number jump -->
+  <div class="dash-search-row">
+    <label>🔍 Revisit a part by number</label>
+    <input id="pn-jump-input" class="dash-search-input"
+           placeholder="e.g. ENG-8842-A"
+           onkeydown="if(event.key==='Enter')jumpToPart()"/>
+    <button class="btn-goto" onclick="jumpToPart()">Go to Part →</button>
+    <button class="btn-clear"
+            onclick="document.getElementById('pn-jump-input').value=''">
+      Clear
+    </button>
+  </div>
+
+  <!-- Filter tabs + inline search -->
+  <div class="filter-row">
+    <div class="filter-tabs" id="filter-tabs">
+      ${['all','Pending','InProgress','Done','Outlier'].map(f => {
+        const label = f==='all' ? 'All' : f==='InProgress' ? 'In Progress' : f;
+        const cnt   = f==='all' ? total
+                    : f==='Pending' ? pending
+                    : f==='InProgress' ? in_progress
+                    : f==='Done' ? done : outlier;
+        return `<button class="filter-tab${S.filter===f?' active':''}"
+          onclick="setFilter('${f}')">
+          ${label}<span class="tab-count">${cnt}</span>
+        </button>`;
+      }).join('')}
+    </div>
+    <div class="filter-controls">
+      <input id="dash-inline-search" class="dash-inline-search"
+             type="text" value="${esc(S.searchTerm)}"
+             placeholder="Search parts…"
+             oninput="onSearchInput(this.value)"/>
+      ${S.searchTerm ? `
+        <span class="search-active-badge">
+          🔍 "${esc(S.searchTerm)}"
+          <span class="search-clear-x" onclick="clearSearch()">✕</span>
+        </span>` : ''}
+      <select class="sort-select">
+        <option>Assigned order</option>
+        <option>Part number</option>
+        <option>Status</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Cards + pagination injected here -->
+  <div id="parts-grid-wrap"></div>
+
+</div>`;
+}
+
+function buildSkeletonGrid() {
+  return `<div id="parts-grid-wrap">
+    <div class="parts-grid">
+      ${Array(12).fill(0).map(() => `
+        <div class="skeleton-card">
+          <div class="sk sk-line tall xshort"></div>
+          <div class="sk sk-line short" style="margin-top:10px"></div>
+          <div class="sk sk-line" style="width:80%"></div>
+          <div class="sk sk-line bar"></div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function wireDashboardEvents() {
+  // Auto-focus the inline search
+  setTimeout(() => {
+    document.getElementById('dash-inline-search')?.focus();
+  }, 50);
+}
+
+/* ────────────────────────────────────────────────────────────
+   DASHBOARD — RENDER DATA INTO SHELL
+──────────────────────────────────────────────────────────── */
+function renderDashboard() {
+  // Build shell if not present
+  if (!document.getElementById('parts-grid-wrap')) {
+    mc().innerHTML = buildDashboardShell();
+    wireDashboardEvents();
+  }
+
+  // Update subtitle
+  const sub = document.getElementById('dash-subtitle');
+  if (sub) {
+    const p = S.pagination;
+    const label = S.searchTerm
+      ? `${p.total.toLocaleString()} matches for "${S.searchTerm}"`
+      : S.filter !== 'all'
+      ? `${p.total.toLocaleString()} ${S.filter} parts`
+      : `${S.stats.total || 0} parts in this batch`;
+    sub.textContent = `${label} · page ${p.page} of ${p.pages} · last synced just now`;
+  }
+
+  // Inject cards + pagination
+  const wrap = document.getElementById('parts-grid-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = `
+    <div class="parts-grid">${renderCards()}</div>
+    ${renderPagination()}
+  `;
+}
+
+/* ────────────────────────────────────────────────────────────
+   PART CARDS
+──────────────────────────────────────────────────────────── */
+function renderCards() {
+  if (!S.parts.length) {
+    const msg = S.searchTerm
+      ? `No parts found matching <strong>"${esc(S.searchTerm)}"</strong>`
+      : `No ${S.filter !== 'all' ? S.filter : ''} parts found.`;
+    return `<div class="no-parts-msg">
+      ${msg}
+      ${S.searchTerm
+        ? `<br><br><button class="btn-clear" onclick="clearSearch()">
+             ✕ Clear search
+           </button>`
+        : ''}
+    </div>`;
+  }
+
+  return S.parts.map(p => {
+    const action = p.status==='Done'       ? 'View'
+                 : p.status==='InProgress' ? 'Continue'
+                 : p.status==='Outlier'    ? 'Review'  : 'Start';
+    const dot    = p.status==='Done'
+                 ? `<span style="color:var(--green)">●</span> `
+                 : p.status==='InProgress'
+                 ? `<span style="color:var(--blue)">●</span> `
+                 : p.status==='Outlier'
+                 ? `<span style="color:var(--orange)">◆</span> `
+                 : '';
+    const label  = p.status==='InProgress' ? 'In Progress' : p.status;
+
+    return `
+<div class="part-card s-${p.status}"
+     onclick="navigate('part-detail',{partNumber:'${esc(p.part_number)}'})">
+  <div class="card-top">
+    <span class="card-pn">${esc(p.part_number)}</span>
+    <span class="status-badge badge-${p.status}">${dot}${label}</span>
+  </div>
+  <div class="card-name">${esc(p.name)}</div>
+  <div class="card-meta">
+    <span class="card-vmrs">VMRS ${esc(p.vmrs_code||'—')}</span>
+    <span class="card-meta-sep">·</span>
+    <span>${p.attr_count} attrs</span>
+    <span class="card-meta-sep">·</span>
+    <span>📅 ${esc(p.assigned_date||'')}</span>
+  </div>
+  <div class="card-footer">
+    <div class="card-progress">
+      <div class="progress-bar">
+        <div class="progress-fill pf-${p.status}"
+             style="width:${p.progress_pct}%"></div>
+      </div>
+      <span class="progress-pct">${p.progress_pct}%</span>
+    </div>
+    <button class="card-action">${action} →</button>
+  </div>
+</div>`;
+  }).join('');
+}
+
+/* ────────────────────────────────────────────────────────────
+   PAGINATION CONTROLS
+──────────────────────────────────────────────────────────── */
+function renderPagination() {
+  const p = S.pagination;
+  if (!p || p.pages <= 1) return '';
+
+  const start    = (p.page - 1) * p.limit + 1;
+  const end      = Math.min(p.page * p.limit, p.total);
+  const winStart = Math.max(1, Math.min(p.page - 2, p.pages - 4));
+  const winEnd   = Math.min(p.pages, winStart + 4);
+
+  let nums = '';
+  if (winStart > 1) {
+    nums += `<button class="pg-btn" onclick="setPage(1)">1</button>`;
+    if (winStart > 2)
+      nums += `<span style="padding:0 4px;color:var(--text3)">…</span>`;
+  }
+  for (let i = winStart; i <= winEnd; i++) {
+    nums += `<button class="pg-btn${i===p.page?' pg-active':''}"
+      onclick="setPage(${i})">${i}</button>`;
+  }
+  if (winEnd < p.pages) {
+    if (winEnd < p.pages - 1)
+      nums += `<span style="padding:0 4px;color:var(--text3)">…</span>`;
+    nums += `<button class="pg-btn" onclick="setPage(${p.pages})">${p.pages}</button>`;
+  }
+
+  return `
+<div class="pagination-row">
+  <span class="pg-info">
+    Showing <strong>${start.toLocaleString()}–${end.toLocaleString()}</strong>
+    of <strong>${p.total.toLocaleString()}</strong> parts
+  </span>
+
+  <div class="pg-controls">
+    <button class="pg-btn" onclick="setPage(${p.page-1})"
+            ${!p.has_prev?'disabled':''}>‹ Prev</button>
+    ${nums}
+    <button class="pg-btn" onclick="setPage(${p.page+1})"
+            ${!p.has_next?'disabled':''}>Next ›</button>
+  </div>
+
+  <div class="pg-goto">
+    <span>Page</span>
+    <input class="pg-input" type="number"
+           min="1" max="${p.pages}" value="${p.page}"
+           onchange="setPage(parseInt(this.value)||1)"
+           onkeydown="if(event.key==='Enter')setPage(parseInt(this.value)||1)"/>
+    <span>of ${p.pages.toLocaleString()}</span>
+  </div>
+</div>`;
+}
+
+/* ────────────────────────────────────────────────────────────
+   JUMP TO PART
+──────────────────────────────────────────────────────────── */
+function jumpToPart() {
+  const raw = (document.getElementById('pn-jump-input')?.value || '').trim();
+  if (!raw) { showToast('Enter a part number'); return; }
+  // Check current page first for instant nav
+  const local = S.parts.find(p => p.part_number.toUpperCase() === raw.toUpperCase());
+  if (local) { navigate('part-detail', { partNumber: local.part_number }); return; }
+  // Otherwise try fetching directly from API
+  navigate('part-detail', { partNumber: raw.toUpperCase() });
+}
+
+/* ────────────────────────────────────────────────────────────
+   PART DETAIL — LOAD
+──────────────────────────────────────────────────────────── */
+async function loadPartDetail(partNumber) {
+  mc().innerHTML = `<div class="loader">⏳ Loading ${esc(partNumber)}…</div>`;
+  try {
+    const data = await apiFetch(`/parts/${encodeURIComponent(partNumber)}`);
+    S.part     = data;
+    S.attrDefs = data.attr_definitions || { mandatory:[], value_adding:[] };
+    S.attrVals = {};
+
+    // Deep-copy existing saved values
+    Object.entries(data.part_attributes || {}).forEach(([id, val]) => {
+      S.attrVals[id] = { ...val };
+    });
+
+    // Initialise any missing entries from definitions
+    [...S.attrDefs.mandatory, ...S.attrDefs.value_adding].forEach(d => {
+      const key = String(d.id);
+      if (!S.attrVals[key])
+        S.attrVals[key] = { value:'', uom: d.default_uom||'—', has_outlier:false };
+    });
+
+    renderPartDetail();
+  } catch (e) {
+    mc().innerHTML = `
+      <div class="loader" style="color:var(--red)">
+        ❌ ${esc(e.msg || 'Part not found')}
+        <br><br>
+        <button class="btn-back" onclick="navigate('dashboard')">
+          ‹ Back to Dashboard
+        </button>
+      </div>`;
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+   PART DETAIL — RENDER
+──────────────────────────────────────────────────────────── */
+function renderPartDetail() {
+  const p       = S.part;
+  const mTotal  = S.attrDefs.mandatory.length;
+  const mFilled = countFilledMandatory();
+  const mPct    = mTotal ? Math.round(mFilled / mTotal * 100) : 0;
+  const vaTotal = S.attrDefs.value_adding.length;
+  const vaFilled= countFilledVA();
+  const vaFillPct = vaTotal ? vaFilled / vaTotal * 100 : 0;
+
+  const statusDot = p.status==='Done'       ? '● Done'
+                  : p.status==='InProgress' ? '● In Progress'
+                  : p.status==='Outlier'    ? '◆ Outlier'
+                  : p.status;
+
+  mc().innerHTML = `
+<div class="pd-wrap">
+
+  <!-- Breadcrumb -->
+  <div class="pd-breadcrumb">
+    <a onclick="navigate('dashboard')">PartVault</a>
+    <span class="pd-breadcrumb-sep">/</span>
+    <a onclick="navigate('dashboard')">My Assigned Parts</a>
+    <span class="pd-breadcrumb-sep">/</span>
+    <span>${esc(p.part_number)}</span>
+  </div>
+
+  <!-- Header card -->
+  <div class="pd-header-card">
+    <div class="pd-header-top">
+      <div class="pd-pn-row">
+        <span class="pd-part-number">${esc(p.part_number)}</span>
+        <span class="status-badge badge-${p.status}">${statusDot}</span>
+      </div>
+      <button class="btn-back" onclick="navigate('dashboard')">‹ Back to List</button>
+    </div>
+
+    <div class="pd-meta-row">
+      <span class="pd-meta-item">📋 <strong>${esc(p.vmrs_display||'—')}</strong></span>
+      <span class="pd-meta-item">📅 Assigned ${esc(p.assigned_date||'—')}</span>
+    </div>
+
+    <div class="pd-desc-row">
+      <span class="pd-desc-label">Description</span>
+      <input id="pd-desc" class="pd-desc-input"
+             value="${esc(p.description||p.name)}"
+             placeholder="Enter part description…"/>
+      <button class="btn-update-desc"
+              onclick="showToast('AI description update available in production')">
+        🤖 Update Description
+      </button>
+    </div>
+
+    <div class="pd-progress-row">
+      <span class="pd-progress-label">Mandatory completion</span>
+      <div class="pd-mand-bar">
+        <div class="pd-mand-fill" id="pd-mand-fill" style="width:${mPct}%"></div>
+      </div>
+      <span class="pd-mand-pct" id="pd-mand-pct">${mPct}%</span>
+      <span class="pd-mand-msg" id="pd-mand-msg">
+        ${mFilled} of ${mTotal} mandatory filled ·
+        ${mFilled < mTotal ? 'complete all to unlock Save' : '✅ All mandatory filled'}
+      </span>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="pd-body">
+
+    <!-- Left: Attribute tables -->
+    <div id="pd-attrs-col">
+
+      <!-- MANDATORY -->
+      <div class="attr-section">
+        <div class="attr-section-hdr">
+          <span class="sec-badge sec-badge-mandatory">MANDATORY</span>
+          <span class="sec-desc">Must be collected — part marked partial if missing</span>
+          <div class="sec-progress">
+            <div class="sec-progress-line">
+              <div class="sec-progress-fill-m" id="sec-fill-m"
+                   style="width:${mTotal ? mFilled/mTotal*100 : 0}%"></div>
+            </div>
+            <span id="sec-count-m">${mFilled}/${mTotal}</span>
+          </div>
+        </div>
+        <div class="attr-table-wrap">
+          <table class="attr-table">
+            <thead><tr>
+              <th>Attr Code</th>
+              <th>Attribute Name <span style="color:var(--red)">*</span></th>
+              <th>Value <span style="color:var(--red)">*</span></th>
+              <th>UOM <span style="color:var(--red)">*</span></th>
+              <th>Attribute Type <span style="color:var(--red)">*</span></th>
+              <th>UOM Type <span style="color:var(--red)">*</span></th>
+              <th>Classification</th>
+              <th style="width:30px">📌</th>
+            </tr></thead>
+            <tbody id="tbody-mandatory">
+              ${renderAttrRows(S.attrDefs.mandatory)}
+            </tbody>
+            <tfoot>${renderAddRow()}</tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- VALUE ADDING -->
+      <div class="attr-section">
+        <div class="attr-section-hdr">
+          <span class="sec-badge sec-badge-value-adding">VALUE ADDING</span>
+          <span class="sec-desc">Recommended — improves data quality</span>
+          <div class="sec-progress">
+            <div class="sec-progress-line">
+              <div class="sec-progress-fill-va" id="sec-fill-va"
+                   style="width:${vaFillPct}%"></div>
+            </div>
+            <span id="sec-count-va">${vaFilled}/${vaTotal}</span>
+          </div>
+        </div>
+        <div class="attr-table-wrap">
+          <table class="attr-table">
+            <thead><tr>
+              <th>Attr Code</th>
+              <th>Attribute Name <span style="color:var(--red)">*</span></th>
+              <th>Value <span style="color:var(--red)">*</span></th>
+              <th>UOM <span style="color:var(--red)">*</span></th>
+              <th>Attribute Type <span style="color:var(--red)">*</span></th>
+              <th>UOM Type <span style="color:var(--red)">*</span></th>
+              <th>Classification</th>
+              <th style="width:30px">📌</th>
+            </tr></thead>
+            <tbody id="tbody-va">
+              ${renderAttrRows(S.attrDefs.value_adding)}
+            </tbody>
+            <tfoot>${renderAddRow()}</tfoot>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- pd-attrs-col -->
+
+    <!-- Right: Image panel -->
+    <div class="img-panel">
+      <div class="img-panel-hdr">
+        <span class="img-panel-title">🖼 Part Image</span>
+        <span class="img-visual-check">Visual check</span>
+      </div>
+      <div class="img-placeholder">
+        <span class="img-placeholder-icon">⚙️</span>
+        <span class="img-placeholder-label">${esc(p.vmrs_system||'Component')}</span>
+      </div>
+      <div class="img-info">
+        <div class="img-info-row">
+          <span class="img-info-key">Part:</span>
+          <span class="img-info-val">${esc(p.part_number)}</span>
+        </div>
+        <div class="img-info-row">
+          <span class="img-info-key">VMRS:</span>
+          <span class="img-info-val">VMRS ${esc(p.vmrs_code||'—')}</span>
+        </div>
+        <div class="img-info-row">
+          <span class="img-info-key">System:</span>
+          <span class="img-info-val">${esc(p.vmrs_system||'—')}</span>
+        </div>
+        <div class="img-status-note">
+          Placeholder — connect S3 storage in production to load real images.
+        </div>
+      </div>
+      <button class="btn-replace"
+              onclick="showToast('Image upload available in production')">
+        ⬆ Replace Image
+      </button>
+    </div>
+
+  </div><!-- pd-body -->
+
+  <!-- Action bar -->
+  <div class="action-bar">
+    <div class="action-bar-left">
+      <span class="action-count">
+        <strong id="ac-filled">${mFilled}</strong>/${mTotal} mandatory attributes filled
+      </span>
+      ${p.outlier_count > 0 ? `
+        <span class="action-outlier-warn">
+          ⚠ ${p.outlier_count} outlier flag${p.outlier_count>1?'s':''}
+          need action before saving
+        </span>` : ''}
+    </div>
+    <div class="action-bar-right">
+      <button class="btn-cancel" onclick="navigate('dashboard')">Cancel</button>
+      <button class="btn-partial" onclick="handleSave('partial')">
+        🟡 Save as Partial
+      </button>
+      <button class="btn-complete" id="btn-complete"
+              ${mFilled < mTotal ? 'disabled' : ''}
+              onclick="handleSave('complete')">
+        ${mFilled < mTotal ? '🔒' : '💾'} Save &amp; Complete
+      </button>
+    </div>
+  </div>
+
+</div>`;
+
+  attachAttrListeners('tbody-mandatory');
+  attachAttrListeners('tbody-va');
+}
+
+/* ────────────────────────────────────────────────────────────
+   ATTRIBUTE TABLE ROWS
+──────────────────────────────────────────────────────────── */
+function renderAttrRows(defs) {
+  if (!defs.length) return `
+    <tr><td colspan="8"
+        style="text-align:center;color:var(--text3);padding:20px">
+      No attributes defined for this VMRS code.
+    </td></tr>`;
+
+  const UOM_OPTS  = ['mm','cm','m','in','kg','g','bar','psi','°C','°F','%','kN','N','Nm','rpm','V','—'];
+  const TYPE_OPTS = ['Dimensional','Material','Performance','General Attribute'];
+  const UOMT_OPTS = ['Length','Diameter','Area','Volume','Mass','Temperature',
+                     'Pressure','Force','Torque','Speed','Ratio','General','Weight'];
+
+  return defs.map(d => {
+    const av     = S.attrVals[String(d.id)] || { value:'', uom:d.default_uom||'—', has_outlier:false };
+    const filled = av.value && av.value.trim();
+    const clsKey = (d.classification||'').replace(/\s+/g,'-');
+
+    const uomOpts  = UOM_OPTS .map(u => `<option${av.uom===u?' selected':''}>${u}</option>`).join('');
+    const typeOpts = TYPE_OPTS.map(t => `<option${d.attr_type===t?' selected':''}>${t}</option>`).join('');
+    const uomtOpts = UOMT_OPTS.map(t => `<option${d.uom_type===t?' selected':''}>${t}</option>`).join('');
+
+    return `
+<tr class="${av.has_outlier?'row-outlier':''}" data-id="${d.id}">
+  <td class="td-code">${esc(d.attr_code)}</td>
+  <td class="td-name">${esc(d.attr_name)}<span class="td-required">*</span></td>
+  <td>
+    <div class="val-wrap">
+      <span class="val-dot ${filled?'filled':'empty'}">${filled?'●':'○'}</span>
+      <input class="val-input" type="text"
+             value="${esc(av.value||'')}"
+             placeholder="Enter value"
+             data-id="${d.id}"/>
+    </div>
+  </td>
+  <td>
+    <select class="uom-select" data-id="${d.id}" data-field="uom">
+      ${uomOpts}
+    </select>
+  </td>
+  <td>
+    <select class="type-select" data-id="${d.id}" data-field="attr_type">
+      ${typeOpts}
+    </select>
+  </td>
+  <td>
+    <select class="type-select" data-id="${d.id}" data-field="uom_type">
+      ${uomtOpts}
+    </select>
+  </td>
+  <td>
+    <span class="cls-badge cls-${clsKey}">${esc(d.classification)}</span>
+  </td>
+  <td>
+    ${av.has_outlier
+      ? `<span class="outlier-icon" title="Outlier flagged">⚠️</span>`
+      : `<span class="normal-icon">📌</span>`}
+  </td>
+</tr>`;
+  }).join('');
+}
+
+function renderAddRow() {
+  return `
+<tr class="add-row">
+  <td colspan="8">
+    <div class="add-row-inner">
+      <span class="add-tag">+ ADD</span>
+      <input class="add-input" id="add-name" placeholder="Attribute name…"/>
+      <select class="add-select" id="add-type">
+        <option value="">— Attr Type —</option>
+        <option>Dimensional</option>
+        <option>Material</option>
+        <option>Performance</option>
+        <option>General Attribute</option>
+      </select>
+      <select class="add-select" id="add-uom-type">
+        <option value="">— UOM Type —</option>
+        <option>Length</option>
+        <option>Temperature</option>
+        <option>Pressure</option>
+        <option>Ratio</option>
+        <option>General</option>
+      </select>
+      <input class="add-input sm" id="add-value" placeholder="Value"/>
+      <input class="add-input xs" id="add-uom"   placeholder="UOM"/>
+      <button class="btn-add" onclick="handleAddAttr()">+ Add</button>
+    </div>
+  </td>
+</tr>`;
+}
+
+/* ────────────────────────────────────────────────────────────
+   ATTRIBUTE EVENT LISTENERS
+──────────────────────────────────────────────────────────── */
+function attachAttrListeners(tbodyId) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+
+  // Value input
+  tbody.addEventListener('input', e => {
+    if (!e.target.classList.contains('val-input')) return;
+    const id  = String(e.target.dataset.id);
+    const val = e.target.value;
+    if (!S.attrVals[id]) S.attrVals[id] = { value:'', uom:'—', has_outlier:false };
+    S.attrVals[id].value = val;
+
+    // Update indicator dot
+    const row = e.target.closest('tr');
+    const dot = row?.querySelector('.val-dot');
+    if (dot) {
+      dot.textContent = val.trim() ? '●' : '○';
+      dot.className   = `val-dot ${val.trim() ? 'filled' : 'empty'}`;
+    }
+    updateProgress();
+  });
+
+  // UOM / type selects
+  tbody.addEventListener('change', e => {
+    const id    = String(e.target.dataset.id  || '');
+    const field = e.target.dataset.field || '';
+    if (!id || !field) return;
+    if (!S.attrVals[id]) S.attrVals[id] = { value:'', uom:'—', has_outlier:false };
+    S.attrVals[id][field] = e.target.value;
+  });
+}
+
+function handleAddAttr() {
+  const name = document.getElementById('add-name')?.value.trim();
+  if (!name) { showToast('Enter an attribute name'); return; }
+  showToast(`Custom attribute "${name}" queued — saved with next save action`);
+  ['add-name','add-value','add-uom'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+}
+
+/* ────────────────────────────────────────────────────────────
+   PROGRESS TRACKING
+──────────────────────────────────────────────────────────── */
+function countFilledMandatory() {
+  return S.attrDefs.mandatory.filter(d =>
+    (S.attrVals[String(d.id)]?.value || '').trim()
+  ).length;
+}
+
+function countFilledVA() {
+  return S.attrDefs.value_adding.filter(d =>
+    (S.attrVals[String(d.id)]?.value || '').trim()
+  ).length;
+}
+
+function updateProgress() {
+  const mTotal   = S.attrDefs.mandatory.length;
+  const mFilled  = countFilledMandatory();
+  const mPct     = mTotal ? Math.round(mFilled / mTotal * 100) : 0;
+  const vaTotal  = S.attrDefs.value_adding.length;
+  const vaFilled = countFilledVA();
+
+  const q = id => document.getElementById(id);
+
+  // Header bar
+  if (q('pd-mand-fill')) q('pd-mand-fill').style.width = mPct + '%';
+  if (q('pd-mand-pct'))  q('pd-mand-pct').textContent  = mPct + '%';
+  if (q('pd-mand-msg'))  q('pd-mand-msg').textContent  =
+    `${mFilled} of ${mTotal} mandatory filled · ` +
+    (mFilled < mTotal ? 'complete all to unlock Save' : '✅ All mandatory filled');
+
+  // Section progress
+  if (q('sec-fill-m'))  q('sec-fill-m').style.width  = (mTotal ? mFilled/mTotal*100 : 0) + '%';
+  if (q('sec-count-m')) q('sec-count-m').textContent  = `${mFilled}/${mTotal}`;
+  if (q('sec-fill-va')) q('sec-fill-va').style.width  = (vaTotal ? vaFilled/vaTotal*100 : 0) + '%';
+  if (q('sec-count-va'))q('sec-count-va').textContent = `${vaFilled}/${vaTotal}`;
+
+  // Action bar
+  if (q('ac-filled')) q('ac-filled').textContent = mFilled;
+
+  // Save & Complete button lock
+  const btn = q('btn-complete');
+  if (btn) {
+    btn.disabled    = mFilled < mTotal;
+    btn.textContent = (mFilled < mTotal ? '🔒 ' : '💾 ') + 'Save & Complete';
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+   SAVE
+──────────────────────────────────────────────────────────── */
+async function handleSave(saveType) {
+  if (!S.part) return;
+
+  if (saveType === 'complete') {
+    const needed = S.attrDefs.mandatory.length;
+    if (countFilledMandatory() < needed) {
+      showToast(`Fill all ${needed} mandatory attributes to complete`);
+      return;
+    }
+  }
+
+  const attributes = Object.entries(S.attrVals).map(([id, d]) => ({
+    attr_def_id: parseInt(id),
+    value:       d.value || '',
+    uom:         d.uom   || '—',
+  }));
+  const description = document.getElementById('pd-desc')?.value
+                    || S.part.description;
+
+  try {
+    await apiFetch(`/parts/${encodeURIComponent(S.part.part_number)}/save`, {
+      method: 'POST',
+      body:   JSON.stringify({ save_type: saveType, description, attributes }),
+    });
+    showToast(saveType === 'complete'
+      ? '✅ Part saved & completed!'
+      : '💾 Saved as partial');
+    // Refresh dashboard data silently then navigate back
+    try {
+      const data = await apiFetch('/parts/assigned?page=1&limit=48&status=all&search=');
+      S.parts = data.parts; S.stats = data.stats; S.pagination = data.pagination;
+      document.getElementById('si-assigned-count').textContent = S.stats.total || 0;
+    } catch {}
+    setTimeout(() => navigate('dashboard'), 900);
+  } catch (e) {
+    showToast(`❌ Save failed: ${e.msg || 'Unknown error'}`);
+  }
+}
+
+/* ────────────────────────────────────────────────────────────
+   UTILS
+──────────────────────────────────────────────────────────── */
+function mc() { return document.getElementById('main-content'); }
+
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+let _toastTimer;
+function showToast(msg, ms=2800) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+/* ────────────────────────────────────────────────────────────
+   GLOBAL EVENT LISTENERS
+──────────────────────────────────────────────────────────── */
+// Login button + Enter key
+document.getElementById('li-btn')
+  .addEventListener('click', doLogin);
+['li-user', 'li-pass'].forEach(id =>
+  document.getElementById(id)
+    .addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); })
+);
+
+// Header search — Enter to jump/search
+document.getElementById('hdr-search-input')
+  .addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const val = e.target.value.trim();
+    if (!val) return;
+
+    if (S.view === 'dashboard') {
+      // Sync into the inline search box and run search
+      const ds = document.getElementById('dash-inline-search');
+      if (ds) ds.value = val;
+      S.searchTerm = val; S.page = 1; S.parts = [];
+      loadDashboard(true);
+    } else {
+      // On detail page — jump directly to part number
+      navigate('part-detail', { partNumber: val.toUpperCase() });
+    }
+  });
+
+/* ────────────────────────────────────────────────────────────
+   BOOT ON PAGE LOAD
+──────────────────────────────────────────────────────────── */
+init();
+</script>
+</body>
+</html>

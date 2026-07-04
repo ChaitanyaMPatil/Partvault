@@ -1,0 +1,28 @@
+# Database — never commit
+partvault.db
+partvault.db-wal
+partvault.db-shm
+*.db
+
+# CSV data files — too large
+*.csv
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+myenv/
+venv/
+env/
+
+# Secrets
+.env
+
+# IDE
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
